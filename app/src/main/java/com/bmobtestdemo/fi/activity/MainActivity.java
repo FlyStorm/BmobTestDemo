@@ -1,17 +1,26 @@
 package com.bmobtestdemo.fi.activity;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bmobtestdemo.fi.R;
 import com.bmobtestdemo.fi.bean.Person;
+import com.bmobtestdemo.fi.bean.User;
 
-import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.BmobUser;
+import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.DownloadFileListener;
 import cn.bmob.v3.listener.QueryListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
@@ -23,18 +32,61 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private Button mBtn_update;
     private Button mBtn_query;
 
+    //图像对象
+    private ImageView mImageView;
+    //显示用户信息控件
+    private TextView mTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //第一：默认初始化
-        Bmob.initialize(this, "771c17303ade44118e1bb1ee51dec111");
+//        Bmob.initialize(this, "771c17303ade44118e1bb1ee51dec111");
 
         //初始化控件
         initView();
         initListener();
+        initData();
+    }
 
+    private void initData() {
+        //获取传递过来的数据,BmobObject实现了序列化接口
+        Intent intent=getIntent();
+        User user= (User) intent.getSerializableExtra("user");
+        mTextView.setText(user.getUsername()+","+user.getEmail());
+
+        //这里需要拿到用户信息的一个缓存，否则图片下载失败，无法显示
+        user= BmobUser.getCurrentUser(User.class);
+        //获取上传的图像
+        BmobFile bmobFile=user.getIcon();
+        Log.e("bmob", "bmobFile=" + String.valueOf(bmobFile));
+        bmobFile.download(new DownloadFileListener() {
+            @Override
+            public void onStart() {
+                super.onStart();
+            }
+
+            @Override
+            public void done(String savePath, BmobException e) {
+                if(e==null){
+//                    Toast.makeText(MainActivity.this,"下载成功,保存路径:"+savePath,Toast.LENGTH_SHORT).show();
+                    Log.e("bmob", "MainActivity:下载成功，保存路径savePath==" + savePath);
+                    //显示图片
+                    Bitmap bitmap = BitmapFactory.decodeFile(savePath);
+                    mImageView.setImageBitmap(bitmap);
+                }else{
+//                    Toast.makeText(MainActivity.this,"下载失败："+e.getErrorCode()+","+e.getMessage(),Toast.LENGTH_SHORT).show();
+                    Log.e("bmob", "MainActivity:下载失败：" + e.getErrorCode() + "," + e.getMessage());
+                }
+            }
+
+            @Override
+            public void onProgress(Integer value, long newworkSpeed) {
+                Log.e("bmob", "下载进度：" + value + "," + newworkSpeed);
+            }
+        });
     }
 
     private void initListener() {
@@ -49,6 +101,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBtn_del = (Button) findViewById(R.id.btn_delData);
         mBtn_update = (Button) findViewById(R.id.btn_updateData);
         mBtn_query = (Button) findViewById(R.id.btn_queryData);
+
+        mImageView= (ImageView) findViewById(R.id.iv_icon_main);
+        mTextView= (TextView) findViewById(R.id.tv_user_main);
     }
 
     @Override
