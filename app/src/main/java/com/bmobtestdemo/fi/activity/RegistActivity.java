@@ -44,7 +44,6 @@ public class RegistActivity extends Activity {
                 final String email = et_email_regist.getText().toString();
 //                String icon = et_icon_regist.getText().toString();
 
-
                 //获取图片文件的路径(这里写死)
                 String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/22.jpg";
                 Log.e("TAG", "path==" + path);

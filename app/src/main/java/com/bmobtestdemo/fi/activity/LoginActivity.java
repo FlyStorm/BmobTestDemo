@@ -6,10 +6,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.bmobtestdemo.fi.R;
+import com.bmobtestdemo.fi.bean.User;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.SaveListener;
 
 public class LoginActivity extends Activity implements View.OnClickListener {
 
@@ -47,6 +51,25 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_login:
+                String name=mEt_name.getText().toString();
+                String pwd=mEt_pwd.getText().toString();
+
+                User user=new User();
+                user.setUsername(name);
+                user.setPassword(pwd);
+                user.login(new SaveListener<User>() {
+                    @Override
+                    public void done(User user, BmobException e) {
+                        if (e==null){
+                            //登录成功，跳转到主页面
+                            Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                            startActivity(intent);
+                        }else {
+                            //登录失败
+                            Toast.makeText(LoginActivity.this,"帐号或者密码不正确，请重新输入！",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
                 break;
             case R.id.btn_regist:
                 //跳转到注册页面

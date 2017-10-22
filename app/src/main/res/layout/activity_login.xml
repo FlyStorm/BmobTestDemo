@@ -22,6 +22,7 @@
         <EditText
             android:id="@+id/et_pwd"
             android:hint="请输入密码"
+            android:inputType="textPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <LinearLayout
